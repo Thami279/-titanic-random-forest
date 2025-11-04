@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-# -titanic-random-forest
-Random Forest model for Titanic survival prediction pr
-=======
 # Titanic Survival Prediction - MLOps Ready
 
-[![Codecov](https://codecov.io/gh/REPLACE_ME_ORG/REPLACE_ME_REPO/branch/main/graph/badge.svg?token=REPLACE_ME_TOKEN)](https://codecov.io/gh/REPLACE_ME_ORG/REPLACE_ME_REPO)
+[![codecov](https://codecov.io/gh/Thami279/-titanic-random-forest/branch/main/graph/badge.svg)](https://codecov.io/gh/Thami279/-titanic-random-forest)
 
 Production-ready machine learning package for predicting Titanic passenger survival with comprehensive testing, experiment tracking, and deployment capabilities.
 
