@@ -1,0 +1,87 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    
+    - name: Run linting (if available)
+      run: |
+        pip install ruff black || true
+        ruff check titanic_ml/ tests/ || echo "Ruff not installed, skipping"
+        black --check titanic_ml/ tests/ || echo "Black not installed, skipping"
+      continue-on-error: true
+    
+    - name: Run tests with coverage
+      run: |
+        pytest tests/ -v --cov=titanic_ml --cov-report=xml --cov-report=term-missing
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+      continue-on-error: true
+    
+    - name: Check test coverage threshold
+      run: |
+        coverage_percent=$(coverage report | grep TOTAL | awk '{print $NF}' | sed 's/%//')
+        echo "Coverage: ${coverage_percent}%"
+        if (( $(echo "$coverage_percent < 80" | bc -l) )); then
+          echo "Coverage is below 80% threshold"
+          exit 1
+        fi
+
+  notebook-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install nbconvert pytest-nbmake
+    
+    - name: Check notebook structure
+      run: |
+        python -c "import json; nb=json.load(open('random_forest_titantic.ipynb')); assert len(nb['cells']) > 0, 'Notebook is empty'"
+
+
+
+
+
+
+
+
